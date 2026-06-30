@@ -3,3 +3,10 @@ import path from "path";
 
 
 dotenv.config({path:path.join(process.cwd(), ".env")});
+
+const config = {
+    port: process.env.PORT,
+    env: process.env.NODE_ENV ? Number(process.env.NODE_ENV) : 5000,
+};
+
+export default config;
