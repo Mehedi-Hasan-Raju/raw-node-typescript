@@ -1,16 +1,10 @@
 import http, {IncomingMessage, Server, ServerResponse} from "http";
 import config from "./config";
-import addRoute, { RouteHandler, routes } from "./helpers/RouteHandler";
+import  { RouteHandler, routes } from "./helpers/RouteHandler";
+import "./routes";
 
 
 
-addRoute("GET", "/",(req,res) =>{
- res.writeHead(200, {"content-type": "application/json"});
-            res.end(JSON.stringify({
-                message: "Hello from nodejs with typescript...",
-                 path: req.url}));
-            
-})
 
 const server:Server = http.createServer(
     (req: IncomingMessage,res: ServerResponse) =>{
@@ -33,14 +27,7 @@ const server:Server = http.createServer(
         }));
     }
        
-        //root route
-        // if(req.url == "/" && req.method == 'GET'){
-        //     res.writeHead(200, {"content-type": "application/json"});
-        //     res.end(JSON.stringify({
-        //         message: "Hello from nodejs with typescript...",
-        //          path: req.url}));
-            
-        // }
+       
 
         //health route
         // if(req.url == "/api" && req.method == 'GET') {
