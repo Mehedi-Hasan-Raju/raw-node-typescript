@@ -2,74 +2,35 @@ import http, {IncomingMessage, Server, ServerResponse} from "http";
 import config from "./config";
 import  { RouteHandler, routes } from "./helpers/RouteHandler";
 import "./routes";
+import findDynamicRoute from "./helpers/daynamicRouteHandler";
 
+const server: Server = http.createServer(
+  (req: IncomingMessage, res: ServerResponse) => {
+    const method = req.method?.toUpperCase() || "";
+    const path = req.url || "";
 
+    const methodMap = routes.get(method);
+    const handler: RouteHandler | undefined = methodMap?.get(path);
 
-
-const server:Server = http.createServer(
-    (req: IncomingMessage,res: ServerResponse) =>{
-        console.log("server is rinning")
-
-       const method = req.method?.toUpperCase() || "";
-       const path = req.url;
-
-       const methodMap = routes.get(method);
-       const handler: RouteHandler | undefined = methodMap?.get(path || "");
-
-       if(handler){
-          handler(req,res);
-       }else{
-        res.writeHead(404, {"content-type": "application/json"});
-        res.end(JSON.stringify({
-            success: false,
-            message: "Route not found",
-            path: req.url,
-        }));
+    if (handler) {
+      handler(req, res);
+    } else if (findDynamicRoute(method, path)) {
+      const match = findDynamicRoute(method, path);
+      (req as any).params = match?.params;
+      match?.handler(req, res);
+    } else {
+      res.writeHead(404, { "content-type": "application/json" });
+      res.end(
+        JSON.stringify({
+          success: false,
+          message: "Route not found!!!",
+          path,
+        })
+      );
     }
-       
-       
-
-        //health route
-        // if(req.url == "/api" && req.method == 'GET') {
-        //     res.writeHead(200, {"content-type": "application/json"});
-        //     res.end(JSON.stringify({
-        //         message: "Health status is ok",
-        //          path: req.url}));
-            
-        // }
-
-
-        // if(req.url == "/api/users" && req.method == 'POST') {
-            // const user = {
-            //     id:1,
-            //     name: "Raju"
-            // }
-            //  res.writeHead(200, {"content-type": "application/json"});
-            // res.end(JSON.stringify(user));
-
-            // let body = "";
-            // //listen for data chunks
-            // req.on("data", chunk =>{
-            //     body += chunk.toString();
-            // });
-
-            // //handle end of data
-            // req.on("end", () => {
-            //    try{
-            //      const parseBody = JSON.parse(body);
-            //     // Process the user data (e.g., save to database)
-            //     res.writeHead(201, {"content-type": "application/json"});
-            //     res.end(JSON.stringify({message: "User created", user: parseBody}));
-
-            //    }catch(err: any){
-            //     console.log(err?.message);
-            //    }
-              
-                
-            // });
-        }
-)
+  }
+);
 
 server.listen(config.port, () => {
-    console.log(`server is running on port ${config.port}`);
+  console.log(`server is running on port ${config.port}`);
 });
